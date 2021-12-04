@@ -12,23 +12,28 @@ let world;
 var rope,fruit,ground;
 var fruit_con;
 var fruit_con_2;
+var fruit_con_3;
+var rope3;
 
 var bg_img;
 var food;
 var rabbit;
 
-var button,blower;
+var button,button2,button3;
 var bunny;
 var blink,eat,sad;
 var mute_btn;
 
-var fr,rope2;
+var fr;
 
 var bk_song;
 var cut_sound;
 var sad_sound;
 var eating_sound;
 var air;
+var canW;
+var canH;
+
 function preload()
 {
   bg_img = loadImage('background.png');
@@ -52,9 +57,19 @@ function preload()
   eat.looping = false; 
 }
 
-function setup() {
-  createCanvas(500,700);
-
+function setup() 
+{
+  var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if(isMobile){
+    canW = displayWidth; 
+    canH = displayHeight; 
+    createCanvas(displayWidth+80, displayHeight);
+  } 
+  else {
+    canW = windowWidth; 
+    canH = windowHeight; 
+    createCanvas(windowWidth, windowHeight);
+  }
   frameRate(80);
 
   bk_song.play();
@@ -62,20 +77,39 @@ function setup() {
 
   engine = Engine.create();
   world = engine.world;
-  
+
+  //btn 1
   button = createImg('cut_btn.png');
-  button.position(220,30);
+  button.position(20,30);
   button.size(50,50);
   button.mouseClicked(drop);
 
-  
-  rope = new Rope(7,{x:245,y:30});
-  ground = new Ground(200,690,600,20);
+   //btn 2
+   button2 = createImg('cut_btn.png');
+   button2.position(330,35);
+   button2.size(60,60);
+   button2.mouseClicked(drop2);
+ 
+   //btn3
+   button3 = createImg('cut_btn.png');
+   button3.position(360,200);
+   button3.size(60,60);
+   button3.mouseClicked(drop3);
 
+  mute_btn = createImg('mute.png');
+  mute_btn.position(450,20);
+  mute_btn.size(50,50);
+  mute_btn.mouseClicked(mute);
+  
+  rope = new Rope(8,{x:40,y:30});
+  rope2 = new Rope(7,{x:370,y:40});
+  rope3 = new Rope(4,{x:400,y:225});
+
+  ground = new Ground(200,canH,600,20);
   blink.frameDelay = 20;
   eat.frameDelay = 20;
 
-  bunny = createSprite(230,620,100,100);
+  bunny = createSprite(170,canH-100,100,100);
   bunny.scale = 0.2;
 
   bunny.addAnimation('blinking',blink);
@@ -87,6 +121,8 @@ function setup() {
   Matter.Composite.add(rope.body,fruit);
 
   fruit_con = new Link(rope,fruit);
+  fruit_con_2 = new Link(rope2,fruit);
+  fruit_con_3 = new Link(rope3,fruit);
 
   rectMode(CENTER);
   ellipseMode(RADIUS);
@@ -97,7 +133,7 @@ function setup() {
 function draw() 
 {
   background(51);
-  image(bg_img,0,0,490,690);
+  image(bg_img,0,0,displayWidth+300,displayHeight);
 
   push();
   imageMode(CENTER);
@@ -107,6 +143,9 @@ function draw()
   pop();
 
   rope.show();
+  rope2.show();
+  rope3.show();
+
   Engine.update(engine);
   ground.show();
 
@@ -115,12 +154,14 @@ function draw()
   if(collide(fruit,bunny)==true)
   {
     bunny.changeAnimation('eating');
+    eating_sound.play();
   }
-
 
   if(fruit!=null && fruit.position.y>=650)
   {
     bunny.changeAnimation('crying');
+    bk_song.stop();
+    sad_sound.play();
     fruit=null;
      
    }
@@ -129,9 +170,26 @@ function draw()
 
 function drop()
 {
+  cut_sound.play();
   rope.break();
   fruit_con.detach();
   fruit_con = null; 
+}
+
+function drop2()
+{
+  cut_sound.play();
+  rope2.break();
+  fruit_con_2.detach();
+  fruit_con_2 = null;
+}
+
+function drop3()
+{
+  cut_sound.play();
+  rope3.break();
+  fruit_con_3.detach();
+  fruit_con_3 = null;
 }
 
 
@@ -153,3 +211,13 @@ function collide(body,sprite)
 }
 
 
+function mute()
+{
+  if(bk_song.isPlaying())
+     {
+      bk_song.stop();
+     }
+     else{
+      bk_song.play();
+     }
+}
